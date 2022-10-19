@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -19,6 +21,8 @@ public class Map extends AppCompatActivity {
     private MapView mapView;
 
     private Button goBackToMain;
+    // private LinearProgressIndicator linearProgressIndicator;
+    // private Button startLinearProgressButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +49,6 @@ public class Map extends AppCompatActivity {
             }
         });
 
-
         // GO BACK BUTTON
         goBackToMain = findViewById(R.id.button_go_to_main_activity);
         goBackToMain.setOnClickListener(new View.OnClickListener() {
@@ -54,6 +57,22 @@ public class Map extends AppCompatActivity {
                 openMainActivity();
             }
         });
+
+        // LinearProgressIndicator
+        // linearProgressIndicator = findViewById(R.id.linear_progress_indicator);
+        // linearProgressIndicator.setIndicatorDirection(LinearProgressIndicator.INDICATOR_DIRECTION_LEFT_TO_RIGHT);
+        // linearProgressIndicator.setIndeterminate(true);
+        // linearProgressIndicator.setIndeterminateAnimationType(LinearProgressIndicator.INDETERMINATE_ANIMATION_TYPE_CONTIGUOUS);
+
+/*        startLinearProgressButton = findViewById(R.id.start_linear_progress);
+        startLinearProgressButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i("Indicator: ","" + linearProgressIndicator.getVisibility());
+                linearProgressIndicator.setVisibility(View.VISIBLE);
+                Log.i("Indicator: ","" + linearProgressIndicator.getVisibility());
+            }
+        });*/
     }
 
     // Change Activity Methods

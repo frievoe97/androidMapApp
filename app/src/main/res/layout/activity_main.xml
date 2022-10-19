@@ -15,9 +15,9 @@
             android:id="@+id/animationView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:lottie_rawRes="@raw/radar_animation"
             app:lottie_autoPlay="true"
-            app:lottie_loop="true"/>
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/radar_animation" />
     </FrameLayout>
 
     <Button
@@ -42,5 +42,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Activity 1" />
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select View"/>
 
 </LinearLayout>

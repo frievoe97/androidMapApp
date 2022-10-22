@@ -40,6 +40,8 @@ dependencies {
         exclude group: 'group_name', module: 'module_name'
     }
 
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0'
+
     def lottieVersion = "5.2.0"
     implementation "com.airbnb.android:lottie:$lottieVersion"
 

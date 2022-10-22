@@ -8,11 +8,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.friedrichvoelkers.myapplication.ui.SelectOptions;
+
 public class MainActivity extends AppCompatActivity {
 
     private Button button;
     private Button goToMapActivityButton;
     private Button goToMap2ActivityButton;
+    private Button openOptions;
 
     String msg = "Android : ";
 
@@ -47,10 +50,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        openOptions = findViewById(R.id.open_options);
+        openOptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openOptionActivity();
+            }
+        });
+
         Log.d(msg, "The onCreate() event");
     }
 
     // Methods for navigation
+    public void openOptionActivity() {
+        Intent intent = new Intent(this, SelectOptions.class);
+        startActivity(intent);
+    }
+
     public void openMapActivity() {
         Intent intent = new Intent(this, Map.class);
         startActivity(intent);

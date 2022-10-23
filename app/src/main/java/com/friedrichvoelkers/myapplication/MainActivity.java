@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        goToMap2ActivityButton = findViewById(R.id.button_go_to_map2_activity);
+        goToMap2ActivityButton = findViewById(R.id.button_go_to_chat_view);
         goToMap2ActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openMap2Activity() {
-        Intent intent = new Intent(this, Map2.class);
+        Intent intent = new Intent(this, ChatAppActivity.class);
         startActivity(intent);
     }
 

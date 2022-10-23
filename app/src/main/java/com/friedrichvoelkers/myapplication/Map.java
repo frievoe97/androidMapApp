@@ -1,7 +1,5 @@
 package com.friedrichvoelkers.myapplication;
 
-import static com.mapbox.mapboxsdk.maps.Style.DARK;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,7 +26,18 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+
 public class Map extends AppCompatActivity {
+
+
+    private HashMap<Integer, String> allPersons = new HashMap<>();
+    private HashMap<Integer, Symbol> allPersonsSymbol = new HashMap<>();
+
 
     private static final String LOCATION_MARKER = "location_marker";
 
@@ -58,10 +67,23 @@ public class Map extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
+        allPersons.put(53425, "Manuel");
+        allPersons.put(32563, "Sabine");
+        allPersons.put(75315, "Thomas");
+        allPersons.put(13531, "Fabian");
+        allPersons.put(65472, "Claudia");
+        allPersons.put(35734, "Susanne");
+
+        //createSymbolForAllPerson(allPersons);
+
+
+
+        // .zoom(14)
         CameraPosition position = new CameraPosition.Builder()
                 .target(new LatLng(52.516275, 13.377704))
                 .zoom(14)
-                .tilt(20)
                 .build();
 
         // Set total time
@@ -78,7 +100,7 @@ public class Map extends AppCompatActivity {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
-                mapboxMap.setStyle(DARK, new Style.OnStyleLoaded() {
+                mapboxMap.setStyle(Style.LIGHT, new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
                         // Map is set up and the style has loaded. Now you can add data or make other map adjustments
@@ -114,8 +136,8 @@ public class Map extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addMarker();
-                //timer.start();
+                //addMarker();
+                timer.start();
                 //timertest.start();
             }
         });
@@ -125,7 +147,8 @@ public class Map extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateMarker();
+                //updateMarker();
+                addMarker();
                 //runCountdown = false;
                 //countdownText.setText("10:00");
                 //progressBar.setProgress(updateProgressBar(convertStringToTime((String) countdownText.getText())));
@@ -179,11 +202,12 @@ public class Map extends AppCompatActivity {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d("Timer 1: ", String.valueOf(millisUntilFinished));
-                int time = convertStringToTime((String) countdownText.getText());
-                time--;
-                countdownText.setText(convertTimeToString(time));
-                progressBar.setProgress(updateProgressBar(time));
+                updateMarker();
+                //Log.d("Timer 1: ", String.valueOf(millisUntilFinished));
+                //int time = convertStringToTime((String) countdownText.getText());
+                //time--;
+                //countdownText.setText(convertTimeToString(time));
+                //progressBar.setProgress(updateProgressBar(time));
             }
 
             @Override
@@ -197,43 +221,43 @@ public class Map extends AppCompatActivity {
         };
     }
 
+    private void createSymbolForAllPerson(HashMap<Integer, String> allPersons) {
+        for (java.util.Map.Entry<Integer, String> entry : allPersons.entrySet()) {
+            allPersonsSymbol.put(entry.getKey(), symbolManagerMaster.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER).withIconSize(1.3f)));
+        }
+        Log.d("Map", String.valueOf(allPersonsSymbol));
+    }
+
+    private LatLng createRandomCoordinates() {
+        double leftLimit = 13.385971;
+        double rightLimit = 13.370694;
+        double longitude = leftLimit + new Random().nextDouble() * (rightLimit - leftLimit);
+
+        double downLimit = 52.510744;
+        double upperLimit = 52.522980;
+        double latitude = downLimit + new Random().nextDouble() * (upperLimit - downLimit);
+        return new LatLng(latitude, longitude);
+    }
+
     private void updateMarker() {
-        //symbol1.setLatLng(new LatLng(13.377704, 52.512275));
-        //symbol2.setLatLng(new LatLng(13.374642, 52.512380));
-
-        //symbolManagerMaster.update(symbol1);
-        //symbolManagerMaster.update(symbol2);
-
-
-        if (symbolManagerMaster.getAnnotations().containsValue(symbol1)) {
-            Log.d("Contains: ", "true");
-        } else Log.d("Contains: ", "false");
-
-        Log.d("Annotations:", String.valueOf(symbolManagerMaster.getAnnotations()));
+        for (java.util.Map.Entry<Integer, Symbol> entry : allPersonsSymbol.entrySet()) {
+            entry.getValue().setLatLng(createRandomCoordinates());
+            symbolManagerMaster.update(entry.getValue());
+        }
     }
 
     private void addMarker() {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull MapboxMap mapboxMap) {
-                Log.d("Hi", " my name is...");
-
-                symbolBrandenburgGate = new SymbolOptions().withLatLng(new LatLng(52.516275,13.377704))
-                        .withIconImage(LOCATION_MARKER)
-                        .withIconSize(1.3f);
-                symbol1 =  symbolManagerMaster.create(symbolBrandenburgGate);
-
-                SymbolOptions symbolBrandenburgGate2 = new SymbolOptions().withLatLng(new LatLng(52.516380,13.374642))
-                        .withIconImage(LOCATION_MARKER)
-                        .withIconSize(1.3f);
-                symbol2 =  symbolManagerMaster.create(symbolBrandenburgGate2);
+                createSymbolForAllPerson(allPersons);
             }
         });
     }
 
     private void addLocationMarkerToStyle (Style style) {
         style.addImage(LOCATION_MARKER,
-                BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.location_marker)),
+                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.location_marker))),
                 true);
     }
 

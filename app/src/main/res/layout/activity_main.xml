@@ -21,10 +21,10 @@
     </FrameLayout>
 
     <Button
-        android:id="@+id/button_go_to_map2_activity"
+        android:id="@+id/button_go_to_chat_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Go To Map 2" />
+        android:text="Go To Chat View" />
 
     <Button
         android:id="@+id/button_go_to_map_activity"

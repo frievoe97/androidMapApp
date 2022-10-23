@@ -4,7 +4,6 @@ import static com.mapbox.mapboxsdk.maps.Style.DARK;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.collection.LongSparseArray;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,9 +14,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.GeoJson;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -31,9 +27,6 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Map extends AppCompatActivity {
 
@@ -91,7 +84,7 @@ public class Map extends AppCompatActivity {
                         // Map is set up and the style has loaded. Now you can add data or make other map adjustments
                         mapboxMap.setCameraPosition(position);
 
-                        
+
 
                         addLocationMarkerToStyle(style);
                         symbolManagerMaster = new SymbolManager(mapView, mapboxMap, style);

@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <FrameLayout
+<!--    <FrameLayout
         android:layout_width="300dp"
         android:layout_height="300dp">
 
@@ -18,7 +18,7 @@
             app:lottie_autoPlay="true"
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/radar_animation" />
-    </FrameLayout>
+    </FrameLayout>-->
 
     <Button
         android:id="@+id/button_go_to_chat_view"

@@ -3,10 +3,10 @@ package com.friedrichvoelkers.myapplication.ui;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -18,8 +18,6 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
@@ -49,11 +47,18 @@ public class GameActivity extends AppCompatActivity {
 
     private static final String LOCATION_MARKER_BLUE = "map_marker_blue";
     private static final String LOCATION_MARKER_RED = "map_marker_red";
+    private static final String LOCATION_MARKER_BLACK = "map_marker_black";
+    // private static final String LOCATION_MARKER_BLUE = "location_marker";
+    // private static final String LOCATION_MARKER_RED = "location_marker";
 
     private static final double SOUTH_LIMIT = 52.510744;
     private static final double NORTH_LIMIT = 52.522980;
     private static final double WEST_LIMIT = 13.385971;
     private static final double EAST_LIMIT = 13.370694;
+    private static final double CAMERA_POSITION_LATITUDE = 52.516275;
+    private static final double CAMERA_POSITION_LONGITUDE = 13.3783325;
+
+    private static final String STRING_TIME_SPLITTER = ":";
 
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int MILISECONDS_PER_SECOND = 1000;
@@ -64,8 +69,8 @@ public class GameActivity extends AppCompatActivity {
     private int mrXNewLocationTimeLeft;     // time in seconds
 
     private GameEngine gameEngine;
-    private HashMap<Integer, User> allUser = new HashMap<>();
-    private HashMap<Integer, Symbol> allUserSymbols = new HashMap<>();
+    private final HashMap<Integer, User> allUser = new HashMap<>();
+    private final HashMap<Integer, Symbol> allUserSymbols = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +86,9 @@ public class GameActivity extends AppCompatActivity {
 
         // All The Map Stuff...
         // Set up the start camera position (must be deleted later and show current position)
+        // .zoom(14)
         CameraPosition startCameraPosition = new CameraPosition.Builder()
-                .target(new LatLng(52.516275, 13.377704))
+                .target(new LatLng(CAMERA_POSITION_LATITUDE, CAMERA_POSITION_LONGITUDE))
                 .zoom(14)
                 .build();
 
@@ -92,31 +98,22 @@ public class GameActivity extends AppCompatActivity {
 
         gameMapView = (MapView) findViewById(R.id.gameMapView);
         gameMapView.onCreate(savedInstanceState);
-        gameMapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull MapboxMap mapboxMap) {
-                // DIsable mapbox logo and info button
-                mapboxMap.getUiSettings().setAttributionEnabled(false);
-                mapboxMap.getUiSettings().setLogoEnabled(false);
+        gameMapView.getMapAsync(mapboxMap -> {
+            // Disable mapbox logo and info button
+            mapboxMap.getUiSettings().setAttributionEnabled(false);
+            mapboxMap.getUiSettings().setLogoEnabled(false);
 
-                mapboxMap.setStyle(Style.LIGHT, new Style.OnStyleLoaded() {
-                    @Override
-                    public void onStyleLoaded(@NonNull Style style) {
+            mapboxMap.setStyle(Style.LIGHT, style -> {
 
-                        // Add camera position to map
-                        mapboxMap.setCameraPosition(startCameraPosition);
+                // Add camera position to map
+                mapboxMap.setCameraPosition(startCameraPosition);
 
-                        // Initialize SymbolManager
-                        symbolManager = new SymbolManager(gameMapView, mapboxMap, style);
+                // Initialize SymbolManager
+                symbolManager = new SymbolManager(gameMapView, mapboxMap, style);
 
-                        // Add location marker (map marker in blue and red)
-                        addLocationMarkerToStyle(style);
-
-                        // Create for each user a symbol and add the user to the allUserSymbol HashMap
-                        createDummyUserSymbolHashmap();
-                    }
-                });
-            }
+                // Add location marker (map marker in blue and red)
+                addLocationMarkerToStyle(style);
+            });
         });
 
         countdownText = findViewById(R.id.text_show_countdown);
@@ -124,29 +121,26 @@ public class GameActivity extends AppCompatActivity {
 
         // Init Buttons
         startButton = findViewById(R.id.button_start_move_user);
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                countdownTimer.start();
-            }
+        startButton.setOnClickListener(view -> {
+            // Create for each user a symbol and add the user to the allUserSymbol HashMap
+            createDummyUserSymbolHashmap();
+            countdownTimer.start();
         });
 
         stopButton = findViewById(R.id.button_stop_move_user);
-        stopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                countdownTimer.cancel();
-            }
-        });
+        stopButton.setOnClickListener(view -> countdownTimer.cancel());
 
         // Init ProgressBar
         progressBar = findViewById(R.id.game_progress_bar);
         progressBar.setProgress(100);
 
-
         countdownTimer = new CountDownTimer(GAME_DURATION_IN_MINUTES * SECONDS_PER_MINUTE * MILISECONDS_PER_SECOND, 1000) {
             @Override
             public void onTick(long l) {
+                Log.d(loggerTag, String.valueOf(allUserSymbols));
+
+                mrXNewLocationTimeLeft = convertStringToTime((String) countdownText.getText());
+
                 mrXNewLocationTimeLeft--;
 
                 // Change text
@@ -171,14 +165,14 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private int convertStringToTime(String time) {
-        String[] timeArray = time.split(":");
-        return Integer.parseInt(timeArray[0]) * 60 + Integer.parseInt(timeArray[1]);
+        String[] timeArray = time.split(STRING_TIME_SPLITTER);
+        return Integer.parseInt(timeArray[0]) * SECONDS_PER_MINUTE + Integer.parseInt(timeArray[1]);
     }
 
     private String convertTimeToString(int time) {
-        int minutes = time % 60;
-        minutes = (time - minutes) / 60;
-        int seconds = (time - minutes * 60);
+        int minutes = time % SECONDS_PER_MINUTE;
+        minutes = (time - minutes) / SECONDS_PER_MINUTE;
+        int seconds = (time - minutes * SECONDS_PER_MINUTE);
         if (seconds < 10) return minutes + ":0" + seconds;
         return minutes + ":" + seconds;
     }
@@ -189,20 +183,26 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updateDummyUserLocations() {
-        for (java.util.Map.Entry<Integer, Symbol> entry : allUserSymbols.entrySet()) {
-            entry.getValue().setLatLng(createRandomCoordinates());
-            symbolManager.update(entry.getValue());
+        for (java.util.Map.Entry<Integer, Symbol> integerSymbolEntry : allUserSymbols.entrySet()) {
+            integerSymbolEntry.getValue().setLatLng(createRandomCoordinates());
+            symbolManager.update(integerSymbolEntry.getValue());
         }
     }
 
     private void createDummyUserSymbolHashmap() {
-        for (Map.Entry<Integer, User> entry : allUser.entrySet()) {
-            if (entry.getValue().isMrX()) {
-                allUserSymbols.put(entry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER_RED).withIconSize(1.3f).withIconColor("#FF5050")));
-            } else {
-                allUserSymbols.put(entry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER_BLUE).withIconSize(1.3f).withIconColor("#00AEEF")));
+        gameMapView.getMapAsync(mapboxMap -> {
+            for (Map.Entry<Integer, User> integerUserEntry : allUser.entrySet()) {
+                if (!integerUserEntry.getValue().isMrX()) {
+                    Log.d(loggerTag, "Found Mr. X");
+                    // .withIconColor("#FF5050")
+                    allUserSymbols.put(integerUserEntry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER_RED).withIconSize(1.3f).withIconColor("#FF5050")));
+                } else {
+                    Log.d(loggerTag, "Didn't found Mr. X");
+                    // .withIconColor("#00AEEF")
+                    allUserSymbols.put(integerUserEntry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER_BLUE).withIconSize(1.3f).withIconColor("#00AEEF")));
+                }
             }
-        }
+        });
     }
 
     private void createDummyUserHashmap() {
@@ -213,7 +213,7 @@ public class GameActivity extends AppCompatActivity {
         User user2 = new User("postMalone", createRandomIntBetweenTwoValues(1000, 9999),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
-                false, false);
+                false, true);
         User user3 = new User("HTWilfried", createRandomIntBetweenTwoValues(1000, 9999),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
@@ -221,7 +221,7 @@ public class GameActivity extends AppCompatActivity {
         User user4 = new User("Yolo_1212", createRandomIntBetweenTwoValues(1000, 9999),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
-                false, false);
+                true, false);
         User user5 = new User("MasterOfJava", createRandomIntBetweenTwoValues(1000, 9999),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
@@ -250,6 +250,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void addLocationMarkerToStyle(Style style) {
+
+        style.addImage(LOCATION_MARKER_BLACK,
+                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.map_marker_black))),
+                true);
+
         style.addImage(LOCATION_MARKER_BLUE,
                 Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.map_marker_blue))),
                 true);
@@ -268,7 +273,50 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private LatLng createRandomCoordinates() {
-        return new LatLng(createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
-                createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT));
+        return new LatLng(createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT),
+                createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT));
+    }
+
+    // Lifecycle
+    @Override
+    protected void onStart() {
+        super.onStart();
+        gameMapView.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        gameMapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        gameMapView.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gameMapView.onStop();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        gameMapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        gameMapView.onLowMemory();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        gameMapView.onDestroy();
     }
 }

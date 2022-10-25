@@ -58,4 +58,10 @@
         android:layout_height="wrap_content"
         android:text="Open Option"/>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/login_menue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Game"/>
+
 </LinearLayout>

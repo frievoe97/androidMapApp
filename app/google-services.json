@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "113367138384",
+    "project_id": "realtimemap-f12f1",
+    "storage_bucket": "realtimemap-f12f1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113367138384:android:b3e30a46bd119977f55155",
+        "android_client_info": {
+          "package_name": "com.friedrichvoelkers.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "113367138384-18gkgrpbn6q6n3h4hvedpi2gtd18k4q7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBruP9_Mj-z2USFQUL8-HSdVlyGqeEwS54"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "113367138384-18gkgrpbn6q6n3h4hvedpi2gtd18k4q7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

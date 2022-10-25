@@ -262,8 +262,7 @@ public class Map extends AppCompatActivity {
     }
 
     private int updateProgressBar (int time) {
-        int result = (int) ((100.0 / totalTime) * time);
-        return result;
+        return (int) ((100.0 / totalTime) * time);
     }
 
     private int convertStringToTime(String time) {

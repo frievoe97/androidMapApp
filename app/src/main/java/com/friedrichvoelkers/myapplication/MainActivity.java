@@ -1,5 +1,7 @@
 package com.friedrichvoelkers.myapplication;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -8,7 +10,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.friedrichvoelkers.myapplication.ui.SelectOptions;
+import com.friedrichvoelkers.myapplication.gameEngine.GameEngine;
+import com.friedrichvoelkers.myapplication.ui.GameActivity;
+import com.friedrichvoelkers.myapplication.ui.LogInActivity;
+import com.friedrichvoelkers.myapplication.users.User;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,6 +26,13 @@ public class MainActivity extends AppCompatActivity {
     private Button goToMapActivityButton;
     private Button goToMap2ActivityButton;
     private Button openOptions;
+    private Button logInButton;
+
+    private DatabaseReference firebaseRealtimeDatabase;
+    private DatabaseReference firebaseRealtimeDatabaseUser;
+    private DatabaseReference firebaseRealtimeDatabaseGame;
+
+    private int gameID = 5324956;
 
     String msg = "Android : ";
 
@@ -24,6 +41,46 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        User user1 = new User("frie_voe", 3551, 53.13, 13.3452, 53.13, 13.3452, false, true);
+        User user2 = new User("lolmaster123", 5231, 53.13, 13.3452, 53.13, 13.3452, false, false);
+        User user3 = new User("MrYXZ", 1645, 53.13, 13.3452, 53.13, 13.3452, true, false);
+
+        GameEngine gameEngine = new GameEngine(gameID, 1000, 13000);
+
+        // Firebase
+        firebaseRealtimeDatabase =  FirebaseDatabase.getInstance().getReference().child("games").child(String.valueOf(gameID));
+
+        firebaseRealtimeDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Log.d(msg, snapshot.getValue().toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        firebaseRealtimeDatabaseGame = firebaseRealtimeDatabase.child("game");
+        firebaseRealtimeDatabaseUser = firebaseRealtimeDatabase.child("user");
+
+        firebaseRealtimeDatabaseUser.child(String.valueOf(user1.getId())).setValue(user1);
+        firebaseRealtimeDatabaseUser.child(String.valueOf(user2.getId())).setValue(user2);
+        firebaseRealtimeDatabaseUser.child(String.valueOf(user3.getId())).setValue(user3);
+
+        firebaseRealtimeDatabaseGame.setValue(gameEngine);
+
+        //Task snapshot = firebaseRealtimeDatabase.get();
+
+        //Log.d(msg, snapshot.getResult().toString());
+
+
+
+
 
         // init buttons
         button = findViewById(R.id.button);
@@ -42,6 +99,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        logInButton = findViewById(R.id.login_menue);
+        logInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), GameActivity.class);
+                startActivity(intent);
+            }
+        });
+
         goToMap2ActivityButton = findViewById(R.id.button_go_to_chat_view);
         goToMap2ActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,20 +117,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
         openOptions = findViewById(R.id.open_options);
+        openOptions.setText("Get Firebase");
         openOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openOptionActivity();
+                //Task snapshot = firebaseRealtimeDatabase.get();
+
+                //Log.d(msg, snapshot.getResult().toString());
             }
         });
 
         Log.d(msg, "The onCreate() event");
     }
 
+    private void openLogInMenu() {
+
+    }
+
     // Methods for navigation
     public void openOptionActivity() {
-        Intent intent = new Intent(this, SelectOptions.class);
-        startActivity(intent);
+
+
     }
 
     public void openMapActivity() {
@@ -78,8 +151,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openActivity2() {
-        Intent intent = new Intent(this, Activity2.class);
-        startActivity(intent);
+
     }
 
     @Override

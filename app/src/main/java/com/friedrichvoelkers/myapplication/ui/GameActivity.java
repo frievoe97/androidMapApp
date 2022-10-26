@@ -3,7 +3,7 @@ package com.friedrichvoelkers.myapplication.ui;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.graphics.Bitmap;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -47,9 +47,7 @@ public class GameActivity extends AppCompatActivity {
 
     private static final String LOCATION_MARKER_BLUE = "map_marker_blue";
     private static final String LOCATION_MARKER_RED = "map_marker_red";
-    private static final String LOCATION_MARKER_BLACK = "map_marker_black";
-    // private static final String LOCATION_MARKER_BLUE = "location_marker";
-    // private static final String LOCATION_MARKER_RED = "location_marker";
+    private static final String LOCATION_MARKER = "map_marker_black";
 
     private static final double SOUTH_LIMIT = 52.510744;
     private static final double NORTH_LIMIT = 52.522980;
@@ -64,6 +62,9 @@ public class GameActivity extends AppCompatActivity {
     private static final int MILISECONDS_PER_SECOND = 1000;
     private static final int SHOW_MR_X_FREQUENCY_IN_MINUTES = 5;
     private static final int GAME_DURATION_IN_MINUTES = 30;
+
+    private static final int RANDOM_ID_MINIMUM = 1000;
+    private static final int RANDOM_ID_MAXIMUM = 9999;
 
     private int gameTimeLeft;               // time in seconds
     private int mrXNewLocationTimeLeft;     // time in seconds
@@ -96,7 +97,7 @@ public class GameActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_game);
 
-        gameMapView = (MapView) findViewById(R.id.gameMapView);
+        gameMapView = findViewById(R.id.gameMapView);
         gameMapView.onCreate(savedInstanceState);
         gameMapView.getMapAsync(mapboxMap -> {
             // Disable mapbox logo and info button
@@ -137,8 +138,6 @@ public class GameActivity extends AppCompatActivity {
         countdownTimer = new CountDownTimer(GAME_DURATION_IN_MINUTES * SECONDS_PER_MINUTE * MILISECONDS_PER_SECOND, 1000) {
             @Override
             public void onTick(long l) {
-                Log.d(loggerTag, String.valueOf(allUserSymbols));
-
                 mrXNewLocationTimeLeft = convertStringToTime((String) countdownText.getText());
 
                 mrXNewLocationTimeLeft--;
@@ -178,63 +177,69 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void createDummyGameEngine() {
-        gameEngine = new GameEngine(createRandomIntBetweenTwoValues(1000, 9999),
+        gameEngine = new GameEngine(createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 SHOW_MR_X_FREQUENCY_IN_MINUTES * SECONDS_PER_MINUTE, GAME_DURATION_IN_MINUTES * SECONDS_PER_MINUTE);
     }
 
     private void updateDummyUserLocations() {
+        boolean showAlready = false;
         for (java.util.Map.Entry<Integer, Symbol> integerSymbolEntry : allUserSymbols.entrySet()) {
             integerSymbolEntry.getValue().setLatLng(createRandomCoordinates());
             symbolManager.update(integerSymbolEntry.getValue());
+
+            if (!showAlready && Objects.equals(integerSymbolEntry.getValue().getIconImage(), "map_marker_blue")) {
+                showAlready = true;
+                Log.d(loggerTag + " BLUE", String.valueOf(integerSymbolEntry.getValue()));
+            }
+
+            if (Objects.equals(integerSymbolEntry.getValue().getIconImage(), "map_marker_red")) {
+                Log.d(loggerTag + " RED", String.valueOf(integerSymbolEntry.getValue()));
+            }
         }
     }
 
     private void createDummyUserSymbolHashmap() {
         gameMapView.getMapAsync(mapboxMap -> {
             for (Map.Entry<Integer, User> integerUserEntry : allUser.entrySet()) {
-                if (!integerUserEntry.getValue().isMrX()) {
-                    Log.d(loggerTag, "Found Mr. X");
-                    // .withIconColor("#FF5050")
-                    allUserSymbols.put(integerUserEntry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER_RED).withIconSize(1.3f).withIconColor("#FF5050")));
+                if (integerUserEntry.getValue().isMrX()) {
+                    allUserSymbols.put(integerUserEntry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER).withIconSize(1.3f).withIconColor("#FF5050")));
                 } else {
-                    Log.d(loggerTag, "Didn't found Mr. X");
-                    // .withIconColor("#00AEEF")
-                    allUserSymbols.put(integerUserEntry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER_BLUE).withIconSize(1.3f).withIconColor("#00AEEF")));
+                    allUserSymbols.put(integerUserEntry.getKey(), symbolManager.create(new SymbolOptions().withLatLng(createRandomCoordinates()).withIconImage(LOCATION_MARKER).withIconSize(1.3f).withIconColor("#00AEEF")));
                 }
             }
         });
     }
 
     private void createDummyUserHashmap() {
-        User user1 = new User("frie_voe", createRandomIntBetweenTwoValues(1000, 9999),
+        User user1 = new User("frie_voe", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
-        User user2 = new User("postMalone", createRandomIntBetweenTwoValues(1000, 9999),
+        User user2 = new User("postMalone", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, true);
-        User user3 = new User("HTWilfried", createRandomIntBetweenTwoValues(1000, 9999),
+        User user3 = new User("HTWilfried", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
-        User user4 = new User("Yolo_1212", createRandomIntBetweenTwoValues(1000, 9999),
+        User user4 = new User("Yolo_1212", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 true, false);
-        User user5 = new User("MasterOfJava", createRandomIntBetweenTwoValues(1000, 9999),
+        User user5 = new User("MasterOfJava", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
-        User user6 = new User("PythonGuy123", createRandomIntBetweenTwoValues(1000, 9999),
+        User user6 = new User("PythonGuy123", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
-        User user7 = new User("pirate34", createRandomIntBetweenTwoValues(1000, 9999),
+        User user7 = new User("pirate34", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
-        User user8 = new User("swagger45", createRandomIntBetweenTwoValues(1000, 9999),
+        User user8 = new User("swagger45", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
@@ -249,19 +254,15 @@ public class GameActivity extends AppCompatActivity {
         allUser.put(user8.getId(), user8);
     }
 
+    // The official documentation use the same way
+    // https://github.com/mapbox/mapbox-plugins-android/blob/master/app/src/main/java/com/mapbox/mapboxsdk/plugins/testapp/activity/annotation/SymbolActivity.java
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void addLocationMarkerToStyle(Style style) {
 
-        style.addImage(LOCATION_MARKER_BLACK,
-                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.map_marker_black))),
+        style.addImage(LOCATION_MARKER,
+                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.map_marker))),
                 true);
 
-        style.addImage(LOCATION_MARKER_BLUE,
-                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.map_marker_blue))),
-                true);
-
-        style.addImage(LOCATION_MARKER_RED,
-                Objects.requireNonNull(BitmapUtils.getBitmapFromDrawable(getResources().getDrawable(R.drawable.map_marker_red))),
-                true);
     }
 
     private int createRandomIntBetweenTwoValues(int intMin, int intMax) {

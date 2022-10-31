@@ -1,45 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/layout_group_chat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!--<androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_gchannel"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/Widget.AppCompat.Toolbar"
+            app:popupTheme="@style/Theme.AppCompat.Light">
+
+        </androidx.appcompat.widget.Toolbar>-->
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/chat_recycler_view"
+        android:id="@+id/recycler_gchat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:layout_marginBottom="16dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@+id/text_gchat_indicator"
+        app:layout_constraintTop_toBottomOf="@+id/layout_group_chat" />
+
+    <TextView
+        android:id="@+id/text_gchat_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/view"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#e0e0e0"
+        app:layout_constraintBottom_toTopOf="@+id/layout_send_message" />
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:id="@+id/layout_send_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
-            android:orientation="horizontal"
+
+        <EditText
+            android:layout_marginStart="16dp"
+            android:id="@+id/edittext_chat_view_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" >
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/button_chat_view_send"
+            android:background="@android:color/transparent"
+            android:hint="Enter Message"
+            android:inputType="text"
+            android:maxLines="6"
+            tools:ignore="Autofill"
+            android:imeOptions="actionDone"/>
 
-            <EditText
-                android:id="@+id/chat_input_msg"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:hint="Input message."
-                android:layout_weight="1"
-                android:maxLines="2"/>
-
-            <Button
-                android:id="@+id/chat_send_msg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Send"
-                android:textAllCaps="false"/>
-
-        </LinearLayout>
-
+        <Button
+            android:id="@+id/button_chat_view_send"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_alignParentEnd="true"
+            android:background="?attr/selectableItemBackground"
+            android:text="Send"
+            android:textColor="@color/cambridge_blue" />
 
     </RelativeLayout>
 
 
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-</LinearLayout>
+</layout>

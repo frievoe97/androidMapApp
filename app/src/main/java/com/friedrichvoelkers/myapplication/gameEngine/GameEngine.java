@@ -5,6 +5,11 @@ public class GameEngine {
     private int gameID;
     private int showMrXFrequency;   // Time in seconds
     private int gameDuration;       // Time in seconds
+    private double centerLatitude = 52.516275;
+    private double centerLongitude = 13.3783325;
+
+    public GameEngine() {
+    }
 
     public void startGameEngine() {}
 
@@ -36,5 +41,16 @@ public class GameEngine {
 
     public void setGameDuration(int gameDuration) {
         this.gameDuration = gameDuration;
+    }
+
+    @Override
+    public String toString() {
+        return "GameEngine{" +
+                "gameID=" + gameID +
+                ", showMrXFrequency=" + showMrXFrequency +
+                ", gameDuration=" + gameDuration +
+                ", centerLatitude=" + centerLatitude +
+                ", centerLongitude=" + centerLongitude +
+                '}';
     }
 }

@@ -27,6 +27,9 @@ public class User {
         this.isGameMaster = isGameMaster;
     }
 
+    public User() {
+    }
+
     // Custom Methods
     public void updateLocation(double latitude, double longitude) {
         this.currentLatitude = latitude;
@@ -96,5 +99,19 @@ public class User {
 
     public void setGameMaster(boolean gameMaster) {
         isGameMaster = gameMaster;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "nickname='" + nickname + '\'' +
+                ", id=" + id +
+                ", currentLongitude=" + currentLongitude +
+                ", currentLatitude=" + currentLatitude +
+                ", lastLongitude=" + lastLongitude +
+                ", lastLatitude=" + lastLatitude +
+                ", isMrX=" + isMrX +
+                ", isGameMaster=" + isGameMaster +
+                '}';
     }
 }

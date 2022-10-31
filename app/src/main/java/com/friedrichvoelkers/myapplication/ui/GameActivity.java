@@ -4,6 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -12,6 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.friedrichvoelkers.myapplication.R;
+import com.friedrichvoelkers.myapplication.chat.Message;
+import com.friedrichvoelkers.myapplication.data.GlobalState;
 import com.friedrichvoelkers.myapplication.gameEngine.GameEngine;
 import com.friedrichvoelkers.myapplication.users.User;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -24,6 +32,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,12 +58,18 @@ public class GameActivity extends AppCompatActivity {
     private static final String LOCATION_MARKER_RED = "map_marker_red";
     private static final String LOCATION_MARKER = "map_marker_black";
 
+    private static final double CENTER_LATITUDE = 52.516275;
+    private static final double CENTER_LONGITUDE = 13.3783325;
+
     private static final double SOUTH_LIMIT = 52.510744;
     private static final double NORTH_LIMIT = 52.522980;
     private static final double WEST_LIMIT = 13.385971;
     private static final double EAST_LIMIT = 13.370694;
     private static final double CAMERA_POSITION_LATITUDE = 52.516275;
     private static final double CAMERA_POSITION_LONGITUDE = 13.3783325;
+
+    private static final int LOCATION_REFRESH_TIME = 15000; // 15 seconds to update
+    private static final int LOCATION_REFRESH_DISTANCE = 500; // 500 meters to update
 
     private static final String STRING_TIME_SPLITTER = ":";
 
@@ -70,7 +85,7 @@ public class GameActivity extends AppCompatActivity {
     private int mrXNewLocationTimeLeft;     // time in seconds
 
     private GameEngine gameEngine;
-    private final HashMap<Integer, User> allUser = new HashMap<>();
+    private HashMap<Integer, User> allUser = new HashMap<>();
     private final HashMap<Integer, Symbol> allUserSymbols = new HashMap<>();
 
     @Override
@@ -79,15 +94,23 @@ public class GameActivity extends AppCompatActivity {
 
         mrXNewLocationTimeLeft = SHOW_MR_X_FREQUENCY_IN_MINUTES * SECONDS_PER_MINUTE;
 
+        // Create dummy GameEngine, UserHashMap, MessageArrayList
+        createDummyStartData();
+        // Check...
+        Log.d("Dummy GameEngine:", ((GlobalState) this.getApplication()).getGameEngineGlobal().toString());
+        Log.d("Dummy UserHashMap:", ((GlobalState) this.getApplication()).getAllUserGlobal().toString());
+        Log.d("Dummy MessageArrayList:", ((GlobalState) this.getApplication()).getAllMessagesGlobal().toString());
+
         // Add dummy user data
-        createDummyUserHashmap();
+        //createDummyUserHashmap();
+        allUser = ((GlobalState) this.getApplication()).getAllUserGlobal();
 
         // Add dummy gameEngine
-        createDummyGameEngine();
+        //createDummyGameEngine();
+        gameEngine = createDummyGameEngine();
 
         // All The Map Stuff...
         // Set up the start camera position (must be deleted later and show current position)
-        // .zoom(14)
         CameraPosition startCameraPosition = new CameraPosition.Builder()
                 .target(new LatLng(CAMERA_POSITION_LATITUDE, CAMERA_POSITION_LONGITUDE))
                 .zoom(14)
@@ -133,7 +156,15 @@ public class GameActivity extends AppCompatActivity {
 
         // Init ProgressBar
         progressBar = findViewById(R.id.game_progress_bar);
-        progressBar.setProgress(100);
+        progressBar.setIndeterminate(false);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("Min", String.valueOf(progressBar.getMin()));
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("Max", String.valueOf(progressBar.getMax()));
+        }
+        Log.d("Progress", String.valueOf(progressBar.getProgress()));
+
 
         countdownTimer = new CountDownTimer(GAME_DURATION_IN_MINUTES * SECONDS_PER_MINUTE * MILISECONDS_PER_SECOND, 1000) {
             @Override
@@ -176,8 +207,8 @@ public class GameActivity extends AppCompatActivity {
         return minutes + ":" + seconds;
     }
 
-    private void createDummyGameEngine() {
-        gameEngine = new GameEngine(createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
+    private GameEngine createDummyGameEngine() {
+        return new GameEngine(createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 SHOW_MR_X_FREQUENCY_IN_MINUTES * SECONDS_PER_MINUTE, GAME_DURATION_IN_MINUTES * SECONDS_PER_MINUTE);
     }
 
@@ -210,7 +241,10 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
-    private void createDummyUserHashmap() {
+    private HashMap<Integer, User> createDummyUserHashmap() {
+
+        HashMap<Integer, User> dummyUserHashMap = new HashMap<>();
+
         User user1 = new User("frie_voe", createRandomIntBetweenTwoValues(RANDOM_ID_MINIMUM, RANDOM_ID_MAXIMUM),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
@@ -244,14 +278,16 @@ public class GameActivity extends AppCompatActivity {
                 createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT), createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT),
                 false, false);
 
-        allUser.put(user1.getId(), user1);
-        allUser.put(user2.getId(), user2);
-        allUser.put(user3.getId(), user3);
-        allUser.put(user4.getId(), user4);
-        allUser.put(user5.getId(), user5);
-        allUser.put(user6.getId(), user6);
-        allUser.put(user7.getId(), user7);
-        allUser.put(user8.getId(), user8);
+        dummyUserHashMap.put(user1.getId(), user1);
+        dummyUserHashMap.put(user2.getId(), user2);
+        dummyUserHashMap.put(user3.getId(), user3);
+        dummyUserHashMap.put(user4.getId(), user4);
+        dummyUserHashMap.put(user5.getId(), user5);
+        dummyUserHashMap.put(user6.getId(), user6);
+        dummyUserHashMap.put(user7.getId(), user7);
+        dummyUserHashMap.put(user8.getId(), user8);
+
+        return dummyUserHashMap;
     }
 
     // The official documentation use the same way
@@ -277,6 +313,43 @@ public class GameActivity extends AppCompatActivity {
         return new LatLng(createRandomDoubleBetweenTwoValues(SOUTH_LIMIT, NORTH_LIMIT),
                 createRandomDoubleBetweenTwoValues(WEST_LIMIT, EAST_LIMIT));
     }
+
+
+
+    // Create the startData
+    private void createDummyStartData() {
+        ((GlobalState) this.getApplication()).createGameEngine(createDummyGameEngine());
+        ((GlobalState) this.getApplication()).createAllMessagesGlobal(createDummyMessages());
+        ((GlobalState) this.getApplication()).createAllUserGlobal(createDummyUserHashmap());
+    }
+
+    private ArrayList<Message> createDummyMessages() {
+
+        ArrayList<Message> dummyMessages = new ArrayList<>();
+        int testtime = 1666882455;
+
+        dummyMessages.add(new Message("frievoe", "Hallo", testtime));
+        dummyMessages.add(new Message("David", "Moin ;)", testtime + 30));
+        dummyMessages.add(new Message("Malte", "Hallöle", testtime + 31));
+        dummyMessages.add(new Message("frievoe", "Wo wollen wir suchen?", testtime + 32));
+        dummyMessages.add(new Message("frievoe", "Soll ich richtung Frensehturm?", testtime + 101));
+        dummyMessages.add(new Message("Gustav", "Ja, klingt gut!", testtime + 115));
+        dummyMessages.add(new Message("Gustav", "Ja, klingt gut!", testtime + 130));
+        dummyMessages.add(new Message("frievoe", "Wo wollen wir suchen?", testtime + 134));
+        dummyMessages.add(new Message("frievoe", "Wo wollen wir suchen?", testtime + 135));
+        dummyMessages.add(new Message("Gustav", "Ja, klingt gut!", testtime + 156));
+        dummyMessages.add(new Message("Gustav", "Ja, klingt gut!", testtime + 173));
+        dummyMessages.add(new Message("frievoe", "Wo wollen wir suchen?", testtime + 194));
+        dummyMessages.add(new Message("Gustav", "Ja, klingt gut!", testtime + 204));
+        dummyMessages.add(new Message("frievoe", "Letzte Nachricht", testtime + 230));
+        dummyMessages.add(new Message("Manuel", "Okay, eine Nachricht kommt noch... Und dier ist sehr land. " +
+                "Der folgende Satz wird ganz oft kopier. Okay? Der folgende Satz wird ganz oft kopier. Okay? Der folgende " +
+                "Satz wird ganz oft kopier. Okay? Der folgende Satz wird ganz oft kopier. Okay? Der folgende Satz wird ganz " +
+                "oft kopier. Okay?", testtime + 256));
+
+        return dummyMessages;
+    }
+
 
     // Lifecycle
     @Override

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.friedrichvoelkers.myapplication.chat.ChatActivity;
 import com.friedrichvoelkers.myapplication.gameEngine.GameEngine;
 import com.friedrichvoelkers.myapplication.ui.GameActivity;
 import com.friedrichvoelkers.myapplication.ui.LogInActivity;
@@ -117,10 +118,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         openOptions = findViewById(R.id.open_options);
-        openOptions.setText("Get Firebase");
+        openOptions.setText("Open Chat");
         openOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), ChatActivity.class);
+                startActivity(intent);
                 //Task snapshot = firebaseRealtimeDatabase.get();
 
                 //Log.d(msg, snapshot.getResult().toString());

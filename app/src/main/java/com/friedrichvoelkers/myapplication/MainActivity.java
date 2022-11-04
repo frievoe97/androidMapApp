@@ -1,7 +1,6 @@
 package com.friedrichvoelkers.myapplication;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,11 +8,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.friedrichvoelkers.myapplication.chat.ChatActivity;
+import com.friedrichvoelkers.myapplication.chat.Message;
+import com.friedrichvoelkers.myapplication.data.GlobalState;
 import com.friedrichvoelkers.myapplication.gameEngine.GameEngine;
-import com.friedrichvoelkers.myapplication.ui.GameActivity;
-import com.friedrichvoelkers.myapplication.ui.LogInActivity;
 import com.friedrichvoelkers.myapplication.users.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,27 +22,73 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
 public class MainActivity extends AppCompatActivity {
 
-    private Button button;
+    private Button buttonCreateNewGame;
+    private Button buttonJoinGame;
+    private Button buttonOpenChat;
     private Button goToMapActivityButton;
-    private Button goToMap2ActivityButton;
-    private Button openOptions;
-    private Button logInButton;
+
+    private EditText gameIdTextInput;
+    private EditText nicknameTextInput;
 
     private DatabaseReference firebaseRealtimeDatabase;
+    private DatabaseReference firebaseRealtimeDatabaseGames;
     private DatabaseReference firebaseRealtimeDatabaseUser;
     private DatabaseReference firebaseRealtimeDatabaseGame;
 
-    private int gameID = 5324956;
+    private int gameID;
+    private String nickname;
 
     String msg = "Android : ";
+
+    //GlobalState gs = (GlobalState) getApplication();
+
+    private ArrayList<Integer> allExsistingGameIds = new ArrayList<>();
 
     // Default lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        firebaseRealtimeDatabase =  FirebaseDatabase.getInstance().getReference();
+        firebaseRealtimeDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for(DataSnapshot data : snapshot.getChildren()) {
+                        Log.d("All Keys in root: ", data.getKey());
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+        firebaseRealtimeDatabaseGames = firebaseRealtimeDatabase.child("games");
+        firebaseRealtimeDatabaseGames.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    allExsistingGameIds.clear();
+                    for(DataSnapshot data : snapshot.getChildren()) {
+                        allExsistingGameIds.add(Integer.valueOf(data.getKey()));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        /*
 
         User user1 = new User("frie_voe", 3551, 53.13, 13.3452, 53.13, 13.3452, false, true);
         User user2 = new User("lolmaster123", 5231, 53.13, 13.3452, 53.13, 13.3452, false, false);
@@ -79,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Log.d(msg, snapshot.getResult().toString());
 
-
-
+        */
+        /*
 
 
         // init buttons
@@ -109,52 +156,87 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        goToMap2ActivityButton = findViewById(R.id.button_go_to_chat_view);
-        goToMap2ActivityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                openMap2Activity();
-            }
+        */
+
+        goToMapActivityButton = findViewById(R.id.button_go_to_map_activity);
+        goToMapActivityButton.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), Map.class);
+            startActivity(intent);
         });
 
-        openOptions = findViewById(R.id.open_options);
-        openOptions.setText("Open Chat");
-        openOptions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(), ChatActivity.class);
-                startActivity(intent);
-                //Task snapshot = firebaseRealtimeDatabase.get();
+        nicknameTextInput = findViewById(R.id.nickname_text);
+        gameIdTextInput = findViewById(R.id.game_id_text);
 
-                //Log.d(msg, snapshot.getResult().toString());
-            }
+        buttonJoinGame = findViewById(R.id.main_button_connect_game);
+        buttonJoinGame.setOnClickListener(view -> {
+
+            GlobalState.setGameId(Integer.parseInt(String.valueOf(gameIdTextInput.getText())));
+            GlobalState.setNickname(String.valueOf(nicknameTextInput.getText()));
+
+            // Get All IDs
+            firebaseRealtimeDatabaseGames.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        for(DataSnapshot data : snapshot.getChildren()) {
+                            allExsistingGameIds.add(Integer.parseInt(data.getKey()));
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            if (allExsistingGameIds.contains(GlobalState.getGameId())) {
+                GlobalState.addUser(new User(GlobalState.getNickname(), GlobalState.getNickname().hashCode(), 53.4,
+                        13.5, 53.4, 13.5, false, false));
+                firebaseRealtimeDatabase.child("games").child(String.valueOf(GlobalState.getGameId())).child("user").push()
+                        .setValue(GlobalState.getAllUserGlobal().get(GlobalState.getNickname().hashCode()));
+            } else Toast.makeText(getApplicationContext(), "Game ID dont't exists!", Toast.LENGTH_LONG).show();
+        });
+
+
+        buttonCreateNewGame = findViewById(R.id.main_button_create_new_game);
+        buttonCreateNewGame.setOnClickListener(view -> {
+            GlobalState.setGameId(Integer.parseInt(String.valueOf(gameIdTextInput.getText())));
+            GlobalState.setNickname(String.valueOf(nicknameTextInput.getText()));
+
+            GlobalState.addUser(new User(GlobalState.getNickname(), GlobalState.getNickname().hashCode(), 53.4,
+                    13.5, 53.4, 13.5, false, true));
+
+            GlobalState.createGameEngine(new GameEngine(GlobalState.getGameId(), 1, 5));
+
+            //firebaseRealtimeDatabase.child("games").child(String.valueOf(GlobalState.getGameId())).child("user").child(String.valueOf(GlobalState.getNickname().hashCode())).setValue(GlobalState.getAllUserGlobal().get(GlobalState.getNickname().hashCode()));
+            firebaseRealtimeDatabase.child("games").child(String.valueOf(GlobalState.getGameId())).child("user").push()
+                    .setValue(GlobalState.getAllUserGlobal().get(GlobalState.getNickname().hashCode()));
+            firebaseRealtimeDatabase.child("games").child(String.valueOf(GlobalState.getGameId())).child("game").setValue(GlobalState.getGameEngineGlobal());
+            firebaseRealtimeDatabase.child("games").child(String.valueOf(GlobalState.getGameId())).child("messages").setValue(new ArrayList<>());
+        });
+
+
+        // GO TO MAP
+        goToMapActivityButton = findViewById(R.id.button_go_to_map_activity);
+        goToMapActivityButton.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), Map.class);
+            startActivity(intent);
+        });
+
+        // GO TO CHAT
+        buttonOpenChat = findViewById(R.id.main_button_open_chat);
+        buttonOpenChat.setOnClickListener(view -> {
+            Intent intent = new Intent(view.getContext(), ChatActivity.class);
+            startActivity(intent);
         });
 
         Log.d(msg, "The onCreate() event");
     }
 
-    private void openLogInMenu() {
-
-    }
-
-    // Methods for navigation
-    public void openOptionActivity() {
-
-
-    }
-
-    public void openMapActivity() {
-        Intent intent = new Intent(this, Map.class);
-        startActivity(intent);
-    }
-
     public void openMap2Activity() {
         Intent intent = new Intent(this, ChatAppActivity.class);
         startActivity(intent);
-    }
-
-    public void openActivity2() {
-
     }
 
     @Override

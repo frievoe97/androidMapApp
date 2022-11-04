@@ -20,17 +20,7 @@
             app:lottie_rawRes="@raw/radar_animation" />
     </FrameLayout>-->
 
-    <Button
-        android:id="@+id/button_go_to_chat_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Go To Chat View" />
-
-    <Button
-        android:id="@+id/button_go_to_map_activity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Go To Map" />
+<!--
 
     <Button
         android:id="@+id/button"
@@ -41,27 +31,57 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Activity 1" />
+        android:text="Activity 1" />-->
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
+<!--    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" />-->
 
-    <com.google.android.material.button.MaterialButton
+
+    <Button
+        android:id="@+id/button_go_to_map_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select View"/>
+        android:text="Go To Map" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/open_options"
+        android:id="@+id/main_button_create_new_game"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Open Option"/>
+        android:text="Create New Game" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/main_button_connect_game"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join Game" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/main_button_open_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Chat"/>
+
+<!--    <com.google.android.material.button.MaterialButton
         android:id="@+id/login_menue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Game"/>
+        android:text="Start Game"/>-->
+
+    <EditText
+        android:id="@+id/nickname_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name" />
+
+    <EditText
+        android:id="@+id/game_id_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="numberDecimal"
+        android:text="Game ID"/>
 
 </LinearLayout>

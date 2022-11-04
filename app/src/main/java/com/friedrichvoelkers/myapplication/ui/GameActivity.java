@@ -88,6 +88,8 @@ public class GameActivity extends AppCompatActivity {
     private HashMap<Integer, User> allUser = new HashMap<>();
     private final HashMap<Integer, Symbol> allUserSymbols = new HashMap<>();
 
+    GlobalState gs = (GlobalState) getApplication();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
